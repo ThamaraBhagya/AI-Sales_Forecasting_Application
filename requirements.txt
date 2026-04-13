@@ -1,0 +1,42 @@
+# Core Data Science
+pandas
+numpyP
+scipy
+
+# Machine Learning
+scikit-learn
+xgboost
+lightgbm
+prophet
+statsmodels
+
+# MLflow
+mlflow
+sqlalchemy
+
+# API
+fastapi
+uvicorn[standard]
+pydantic
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+
+# Visualization
+plotly
+matplotlib
+seaborn
+
+# Airflow
+apache-airflow
+
+# Utilities
+python-dotenv
+joblib
+requests
+openpyxl
+
+# Testing
+pytest
+pytest-cov
+httpx
