@@ -42,21 +42,45 @@ class InferenceFeatureEngineer:
         df['is_year_end'] = df['date'].dt.is_year_end.astype(np.int8)
         df['days_to_month_end'] = df['date'].dt.days_in_month - df['date'].dt.day
         
-        # === LAG FEATURES (Default values for demo) ===
-        # In production, these would be retrieved from a database
-        avg_sales = request_data.get('price', 50) * 3  # Rough estimate
+        # === SMART LAG FEATURES ===
+        # Generate realistic historical data that reacts to the frontend parameters
+        
+        base_multiplier = 3.0
+        
+        # 1. Store Size Impact
+        size = request_data.get('store_size', 'Medium')
+        if size == 'Large': 
+            base_multiplier *= 2.0
+        elif size == 'Small': 
+            base_multiplier *= 0.3
+            
+        # 2. Location Impact
+        loc = request_data.get('location_type', 'Urban')
+        if loc == 'Urban': 
+            base_multiplier *= 1.5
+        elif loc == 'Rural': 
+            base_multiplier *= 0.6
+            
+        # 3. Competition Impact (0.0 to 1.0)
+        # Higher competition reduces historical volume
+        comp = request_data.get('competition_level', 0.5)
+        base_multiplier *= (1.8 - comp) 
+        
+        # Calculate dynamic historical average
+        avg_sales = request_data.get('price', 50) * base_multiplier
+        
         df['sales_lag_1'] = avg_sales * np.random.uniform(0.9, 1.1)
         df['sales_lag_7'] = avg_sales * np.random.uniform(0.85, 1.15)
         df['sales_lag_14'] = avg_sales * np.random.uniform(0.8, 1.2)
         df['sales_lag_28'] = avg_sales * np.random.uniform(0.75, 1.25)
         
-        # === ROLLING FEATURES (Default values for demo) ===
+        # === ROLLING FEATURES ===
         for window in [7, 14, 28]:
             df[f'sales_rolling_mean_{window}'] = avg_sales * np.random.uniform(0.9, 1.1)
             df[f'sales_rolling_std_{window}'] = avg_sales * 0.15
             df[f'sales_rolling_min_{window}'] = avg_sales * 0.5
             df[f'sales_rolling_max_{window}'] = avg_sales * 1.5
-        
+            
         # === EXPANDING FEATURES ===
         df['sales_expanding_mean'] = avg_sales
         df['sales_expanding_std'] = avg_sales * 0.2

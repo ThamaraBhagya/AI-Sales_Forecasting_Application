@@ -1,215 +1,251 @@
 """
 FastAPI Application for Sales Forecasting
-Production-grade API with model serving
+Production-grade API with model serving and real data analytics
 """
-from fastapi import FastAPI, HTTPException, status
+from pathlib import Path
+import sys
+from typing import List, Dict, Any, Optional
+
+from fastapi import FastAPI, HTTPException, status, Query
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from datetime import datetime
 import uvicorn
-import os
-
-from schemas import (
-    PredictionRequest, PredictionResponse,
-    BatchPredictionRequest, BatchPredictionResponse,
-    ModelInfo, HealthResponse
-)
-from utils.model_loader import ModelLoader
-from utils.feature_engineer import InferenceFeatureEngineer
 from contextlib import asynccontextmanager
 
+# Ensure Python path is set correctly for local imports
+if __package__ is None or __package__ == "":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+# Import Schemas
+from src.api.schemas import (
+    PredictionRequest, PredictionResponse,
+    BatchPredictionRequest, BatchPredictionResponse,
+    ModelInfo, HealthResponse,
+    ModelInsightsResponse,HistoricalDataResponse
+)
+
+# Import Utilities
+from src.api.utils.model_loader import ModelLoader
+from src.api.utils.feature_engineer import InferenceFeatureEngineer
+from src.api.utils.data_explorer import DataExplorer
+
+# Initialize global instances
+model_loader = ModelLoader()
+data_explorer = DataExplorer()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # This runs when the server starts
     try:
         model_loader.load_model()
-        print("✅ Model loaded successfully")
+        print("✅ Backend Systems Online: ML Model Ready")
+        print("✅ Data Explorer connected to Parquet/CSV storage")
     except Exception as e:
-        print(f"⚠️ Warning: Could not load model on startup: {e}")
+        print(f"⚠️ Startup Warning: {e}")
     yield
-    # Anything down here runs when the server shuts down (clean up)
+    # Cleanup runs here on shutdown
 
-# Now attach it to your app like this:
+# Create FastAPI App
 app = FastAPI(
     title="Sales Forecasting API",
-    description="Production ML API for retail sales forecasting",
-    version="1.0.0",
+    description="Production ML API for retail sales forecasting and analytics",
+    version="2.0.0",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan  # <--- Added this line
+    lifespan=lifespan
 )
 
-
-# CORS middleware (for React frontend)
+# CORS middleware for Next.js frontend connection
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production: specify exact origins
+    allow_origins=["*"],  # For dev. In production, change to your Next.js URL.
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Global model loader
-model_loader = ModelLoader()
-
-@app.on_event("startup")
-async def startup_event():
-    """Load model on startup"""
-    try:
-        model_loader.load_model()
-        print("✅ Model loaded successfully")
-    except Exception as e:
-        print(f"⚠️ Warning: Could not load model on startup: {e}")
+# ==========================================
+# SYSTEM / HEALTH ENDPOINTS
+# ==========================================
 
 @app.get("/", tags=["Root"])
 async def root():
-    """Root endpoint"""
-    return {
-        "message": "Sales Forecasting API",
-        "version": "1.0.0",
-        "status": "running",
-        "docs": "/docs",
-        "health": "/health"
-    }
+    return {"message": "Sales Forecasting API Version 2.0", "docs": "/docs"}
 
-@app.get("/health", response_model=HealthResponse, tags=["Health"])
+@app.get("/health", response_model=HealthResponse, tags=["System"])
 async def health_check():
     """Health check endpoint"""
     return HealthResponse(
-        status="healthy" if model_loader.is_loaded() else "model not loaded",
-        api_version="1.0.0",
+        status="healthy" if model_loader.is_loaded() else "model offline",
+        api_version="2.0.0",
         model_loaded=model_loader.is_loaded(),
         timestamp=datetime.now().isoformat()
     )
 
-@app.get("/model/info", response_model=ModelInfo, tags=["Model"])
-async def get_model_info():
-    """Get loaded model information"""
+# ==========================================
+# 1. ANALYTICS ENDPOINTS (Reads from Parquet)
+# ==========================================
+
+@app.get("/analytics/trends", tags=["Analytics Dashboard"])
+async def get_historical_trends(
+    store_id: Optional[str] = Query(None, description="Filter by specific STORE_ID or leave blank for all"),
+    days: int = Query(90, description="Number of past days to fetch")
+):
+    """Returns REAL historical sales trends over time"""
+    data = data_explorer.get_historical_trends(store_id, days)
+    if not data:
+        raise HTTPException(status_code=404, detail="No trend data found")
+    return {"data": data}
+
+@app.get("/analytics/categories", tags=["Analytics Dashboard"])
+async def get_sales_by_category():
+    """Returns REAL sales grouped by category"""
+    return {"data": data_explorer.get_sales_by_category()}
+
+@app.get("/analytics/stores", tags=["Analytics Dashboard"])
+async def get_sales_by_store(top: int = 10):
+    """Returns REAL sales for the top performing stores"""
+    return {"data": data_explorer.get_sales_by_store(top_n=top)}
+
+@app.get("/analytics/regions", tags=["Analytics Dashboard"])
+async def get_sales_by_region():
+    """Returns REAL sales grouped by region"""
+    return {"data": data_explorer.get_sales_by_region()}
+
+@app.get("/analytics/environmental", tags=["Analytics Dashboard"])
+async def get_environmental_impact():
+    """Returns REAL data showing correlation between Temp/Fuel and Sales"""
+    return {"data": data_explorer.get_environmental_impact()}
+@app.get("/analytics/seasonal", tags=["Analytics Dashboard"])
+async def get_seasonal_patterns():
+    """Returns REAL seasonal sales patterns by month"""
+    return {"data": data_explorer.get_seasonal_patterns()}
+
+@app.get("/analytics/promotions", tags=["Analytics Dashboard"])
+async def get_promotion_effectiveness():
+    """Returns REAL promotion effectiveness and revenue lift"""
+    return {"data": data_explorer.get_promotion_effectiveness()}
+# ==========================================
+# 2. MODEL PERFORMANCE ENDPOINTS (Reads from CSV)
+# ==========================================
+
+@app.get("/model/performance", tags=["Model Evaluation"])
+async def get_model_performance():
+    """Returns REAL model metrics & comparison (XGBoost vs LightGBM)"""
+    return {"data": data_explorer.get_model_metrics()}
+
+@app.get("/model/scatter", tags=["Model Evaluation"])
+async def get_prediction_scatter(sample_size: int = 500):
+    """Returns REAL Actual vs Predicted data points for scatter charts"""
+    return {"data": data_explorer.get_actual_vs_predicted(sample_size)}
+
+@app.get("/model/residuals", tags=["Model Evaluation"])
+async def get_error_distribution(bins: int = 20):
+    """Returns REAL error distribution (residuals) for histograms"""
+    return {"data": data_explorer.get_error_distribution(bins)}
+
+@app.get("/model/feature-importance", response_model=ModelInsightsResponse, tags=["Model Evaluation"])
+async def get_feature_importance():
+    """Returns Feature Importance directly from the loaded ML Model"""
     if not model_loader.is_loaded():
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Model not loaded"
-        )
-    
+        raise HTTPException(status_code=503, detail="Model not loaded")
+        
+    importances = model_loader.get_feature_importance()
     model_data = model_loader.get_model()
     
+    return ModelInsightsResponse(
+        model_type=model_data['model_type'],
+        top_features=importances[:20]  # Top 20 as requested in your architecture
+    )
+
+@app.get("/model/info", response_model=ModelInfo, tags=["Model Evaluation"])
+async def get_model_info():
+    """Get loaded model architecture information"""
+    if not model_loader.is_loaded():
+        raise HTTPException(status_code=503, detail="Model not loaded")
+    model_data = model_loader.get_model()
     return ModelInfo(
         model_type=model_data['model_type'],
         model_path=model_loader.model_path,
         n_features=len(model_data['feature_cols']),
-        feature_names=model_data['feature_cols'][:20],  # First 20 for brevity
+        feature_names=model_data['feature_cols'][:20],
         loaded_at=model_loader.loaded_at,
         status="loaded"
     )
 
-@app.post("/predict", response_model=PredictionResponse, tags=["Predictions"])
+@app.post("/model/reload", tags=["Model Evaluation"])
+async def reload_model():
+    """Reload model from disk after retraining"""
+    try:
+        model_loader.reload()
+        return {"status": "success", "loaded_at": model_loader.loaded_at}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ==========================================
+# 3. PREDICTION SIMULATOR (Live ML Inference)
+# ==========================================
+
+@app.post("/predict", response_model=PredictionResponse, tags=["Inference Simulator"])
 async def predict_sales(request: PredictionRequest):
-    """
-    Make a single sales prediction
-    """
+    """Make a single real-time sales prediction based on user inputs"""
     if not model_loader.is_loaded():
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Model not loaded. Please contact administrator."
-        )
+        raise HTTPException(status_code=503, detail="Model not loaded")
     
     try:
-        # Get model and encoders
         model_data = model_loader.get_model()
         encoders = model_loader.get_encoders()
         
-        # Engineer features
         feature_engineer = InferenceFeatureEngineer(encoders)
         features_df = feature_engineer.engineer_features(request.model_dump())
         
-        # Select only the features the model expects
+        # Ensure exact column match
         model_features = model_data['feature_cols']
-        
-        # Add missing features with default value 0
         for col in model_features:
             if col not in features_df.columns:
                 features_df[col] = 0
-        
-        # Select and order features correctly
+                
         X = features_df[model_features]
-        
-        # Make prediction
         prediction = model_data['model'].predict(X)[0]
         
-        # Return response
         return PredictionResponse(
             date=request.date,
             store_id=request.store_id,
             product_id=request.product_id,
             category=request.category,
-            predicted_sales=float(max(0, prediction)),  # Ensure non-negative
+            predicted_sales=float(max(0, prediction)),
             model_used=model_data['model_type'],
             prediction_timestamp=datetime.now().isoformat()
         )
-    
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Prediction failed: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
-@app.post("/predict/batch", response_model=BatchPredictionResponse, tags=["Predictions"])
+@app.post("/predict/batch", response_model=BatchPredictionResponse, tags=["Inference Simulator"])
 async def predict_sales_batch(request: BatchPredictionRequest):
-    """
-    Make batch predictions (up to 1000 at once)
-    """
+    """Make batch predictions for what-if scenario planning"""
     if not model_loader.is_loaded():
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Model not loaded"
-        )
+        raise HTTPException(status_code=503, detail="Model not loaded")
     
     try:
         predictions = []
-        
         for item in request.predictions:
-            # Reuse single prediction logic
             result = await predict_sales(item)
             predictions.append(result)
-        
+            
         model_data = model_loader.get_model()
-        
         return BatchPredictionResponse(
             predictions=predictions,
             total_count=len(predictions),
             model_used=model_data['model_type']
         )
-    
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Batch prediction failed: {str(e)}"
-        )
-
-@app.post("/model/reload", tags=["Model"])
-async def reload_model():
-    """
-    Reload model from disk (useful after retraining)
-    """
-    try:
-        model_loader.reload()
-        return {
-            "message": "Model reloaded successfully",
-            "status": "success",
-            "loaded_at": model_loader.loaded_at
-        }
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to reload model: {str(e)}"
-        )
+        raise HTTPException(status_code=500, detail=f"Batch prediction failed: {str(e)}")
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",
+        "src.api.main:app",
         host="0.0.0.0",
         port=8000,
-        reload=True,  # Auto-reload on code changes
+        reload=True,
         log_level="info"
     )

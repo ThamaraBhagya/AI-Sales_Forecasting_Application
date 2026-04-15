@@ -4,9 +4,8 @@ Model loading and caching utility
 import joblib
 import os
 from datetime import datetime
-from sklearn.preprocessing import LabelEncoder
-import pandas as pd
-import numpy as np
+from pathlib import Path
+
 
 class ModelLoader:
     """
@@ -23,7 +22,7 @@ class ModelLoader:
         return cls._instance
     
     def __init__(self):
-        self.model_path = '../../models/lightgbm_model.pkl'  # Default to best model
+        self.model_path = str(Path(__file__).resolve().parents[3] / 'models' / 'lightgbm_model.pkl')
         self.loaded_at = None
     
     def load_model(self, model_path=None):
@@ -83,6 +82,39 @@ class ModelLoader:
         if self._label_encoders is None:
             self._load_encoders()
         return self._label_encoders
+    def get_feature_importance(self):
+        """Extracts feature importance from the loaded LightGBM model for the XAI Dashboard"""
+        if not self.is_loaded():
+            return []
+            
+        model = self._model_data['model']
+        feature_names = self._model_data['feature_cols']
+        
+        # LightGBM stores feature importance here
+        try:
+            if hasattr(model, 'feature_importances_'):
+                importances = model.feature_importances_
+            elif hasattr(model, 'booster_'):
+                importances = model.booster_.feature_importance(importance_type='gain')
+            else:
+                importances = [0] * len(feature_names)
+                
+            # Normalize to percentages so it looks good on the frontend chart
+            total_importance = sum(importances)
+            if total_importance > 0:
+                importances = [float(i) / total_importance for i in importances]
+                
+            feature_imp = [
+                {"feature": f, "importance": imp} 
+                for f, imp in zip(feature_names, importances)
+            ]
+            
+            # Sort highest to lowest
+            feature_imp.sort(key=lambda x: x["importance"], reverse=True)
+            return feature_imp
+        except Exception as e:
+            print(f"Warning: Could not extract feature importance: {e}")
+            return []
     
     def is_loaded(self):
         """Check if model is loaded"""
