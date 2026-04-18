@@ -10,7 +10,7 @@ from typing import List, Dict, Optional
 
 class DataExplorer:
     def __init__(self):
-        # Resolve path to the root 'sales-forecasting' directory
+       
         self.base_path = Path(__file__).resolve().parents[3]
         
         # File Paths
@@ -19,28 +19,28 @@ class DataExplorer:
         self.metrics_path = self.base_path / "models" / "reports" / "model_comparison.csv"
         self.test_preds_path = self.base_path / "models" / "reports" / "test_predictions.csv"
 
-    # ==========================================
-    # 1. HISTORICAL DATA ANALYTICS (Parquet)
-    # ==========================================
+    
+    # HISTORICAL DATA ANALYTICS (Parquet)
+    
 
     def get_historical_trends(self, store_id: Optional[str] = None, days: int = 90) -> List[Dict]:
-        """📈 Sales Trends Over Time"""
+        """Sales Trends Over Time"""
         if not self.featured_path.exists():
             return []
             
-        # Load only necessary columns
+        
         df = pd.read_parquet(self.featured_path, columns=['date', 'sales', 'store_id'])
         df['date'] = pd.to_datetime(df['date'])
         
         if store_id and store_id.upper() != "ALL":
             df = df[df['store_id'] == store_id]
             
-        # Aggregate by date to get daily totals
+        
         daily_sales = df.groupby('date')['sales'].sum().reset_index()
         daily_sales = daily_sales.sort_values('date', ascending=False).head(days)
-        daily_sales = daily_sales.sort_values('date', ascending=True) # Sort chronologically for charts
+        daily_sales = daily_sales.sort_values('date', ascending=True) 
         
-        # Format for frontend Recharts
+        
         result = []
         for _, row in daily_sales.iterrows():
             result.append({
@@ -50,31 +50,32 @@ class DataExplorer:
         return result
 
     def get_sales_by_category(self):
-        # 1. Read the encoded category instead of the text category
+        
         df = pd.read_parquet(self.featured_path, columns=['category_encoded', 'sales'])
         
-        # 2. Group by the encoded category
+        # Group by the encoded category
         category_sales = df.groupby('category_encoded')['sales'].sum().reset_index()
         
-        # 3. Map numbers back to text using your exact alphabetical categories
+        # Map numbers back to text using your exact alphabetical categories
         category_map = {
-            0: "Automotive", 
-            1: "Clothing", 
-            2: "Electronics", 
-            3: "Grocery", 
+            0: "Grocery", 
+            1: "Electronics", 
+            2: "Clothing", 
+            3: "Home & Garden", 
             4: "Health & Beauty",
-            5: "Home & Garden",
-            6: "Sports",
-            7: "Toys"
+            5: "Sports",
+            6: "Toys",
+            7: "Automotive"
         }
+
         category_sales['category'] = category_sales['category_encoded'].map(category_map).fillna("Other")
         
-        # 4. Return the data matching the expected Pydantic schema
+        
         result = category_sales[['category', 'sales']].to_dict(orient='records')
         return result
 
     def get_sales_by_store(self, top_n: int = 10) -> List[Dict]:
-        """🏪 Sales by Store (Top Performing)"""
+        """Sales by Store (Top Performing)"""
         if not self.featured_path.exists():
             return []
             
@@ -88,20 +89,27 @@ class DataExplorer:
         df = pd.read_parquet(self.featured_path, columns=['region_encoded', 'sales'])
         region_sales = df.groupby('region_encoded')['sales'].sum().reset_index()
         
-        # Use generic Region 0, Region 1 if the exact names aren't known yet
-        region_sales['region'] = region_sales['region_encoded'].apply(lambda x: f"Region {int(x)}")
+        # 🟢 FIXED: Exact regional mapping from your ModelLoader
+        region_map = {
+            0: 'Northeast', 
+            1: 'Southeast', 
+            2: 'Midwest',
+            3: 'Southwest', 
+            4: 'West'
+        }
+        region_sales['region'] = region_sales['region_encoded'].map(region_map).fillna("Unknown")
         
         result = region_sales[['region', 'sales']].to_dict(orient='records')
         return result
 
     def get_environmental_impact(self, sample_size: int = 1000) -> List[Dict]:
-        """🌡️ Temperature & Fuel vs Sales (Using enhanced parquet)"""
+        """Temperature & Fuel vs Sales (Using enhanced parquet)"""
         if not self.enhanced_path.exists():
             return []
             
-        # Load numeric features to see correlations
+        
         cols = ['sales', 'Temperature', 'Fuel_Price', 'IsHoliday']
-        # Use a try block in case column names differ slightly in your actual file
+        
         try:
             df = pd.read_parquet(self.enhanced_path, columns=cols)
             if len(df) > sample_size:
@@ -112,16 +120,16 @@ class DataExplorer:
             return []
 
     def get_seasonal_patterns(self) -> List[Dict]:
-        """📅 Average Sales by Month to show Seasonality"""
+        """ Average Sales by Month to show Seasonality"""
         if not self.featured_path.exists():
             return []
             
-        # Read just date and sales to save memory
+        
         df = pd.read_parquet(self.featured_path, columns=['date', 'sales'])
         df['date'] = pd.to_datetime(df['date'])
         df['month'] = df['date'].dt.month
         
-        # Group by month to find the average volume across all years
+        
         seasonal = df.groupby('month')['sales'].mean().reset_index()
         
         month_map = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
@@ -136,13 +144,13 @@ class DataExplorer:
         return result
 
     def get_promotion_effectiveness(self) -> Dict:
-        """🎯 Promotion vs Non-Promotion Sales Lift"""
+        """ Promotion vs Non-Promotion Sales Lift"""
         if not self.featured_path.exists():
             return {}
             
         df = pd.read_parquet(self.featured_path, columns=['promotion', 'sales'])
         
-        # Calculate average sales for Regular Price (0) vs Promotion (1)
+        
         promo_stats = df.groupby('promotion')['sales'].mean().reset_index()
         
         try:
@@ -164,9 +172,9 @@ class DataExplorer:
             ]
         }
 
-    # ==========================================
-    # 2. MODEL PERFORMANCE (CSV Reports)
-    # ==========================================
+    
+    # MODEL PERFORMANCE (CSV Reports)
+    
 
     def get_model_metrics(self) -> List[Dict]:
         """🏆 Model Comparison Dashboard (MAE, RMSE, R2)"""

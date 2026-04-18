@@ -5,9 +5,9 @@ from pydantic import BaseModel, Field, field_validator
 from typing import List, Optional, Dict, Any
 from datetime import date as date_type
 
-# ==========================================
-# 1. PREDICTION SCHEMAS (The Simulator)
-# ==========================================
+
+# PREDICTION SCHEMAS (The Simulator)
+
 
 class PredictionRequest(BaseModel):
     date: date_type = Field(..., description="Prediction date")
@@ -57,9 +57,9 @@ class BatchPredictionResponse(BaseModel):
     total_count: int
     model_used: str
 
-# ==========================================
-# 2. SYSTEM SCHEMAS
-# ==========================================
+
+# SYSTEM SCHEMAS
+
 
 class ModelInfo(BaseModel):
     model_type: str
@@ -75,9 +75,9 @@ class HealthResponse(BaseModel):
     model_loaded: bool
     timestamp: str
 
-# ==========================================
-# 3. ANALYTICS SCHEMAS (Real Historical Data)
-# ==========================================
+
+# ANALYTICS SCHEMAS (Real Historical Data)
+
 
 class TrendDataPoint(BaseModel):
     date: str
@@ -98,13 +98,13 @@ class RegionSales(BaseModel):
     region: str
     sales: float
 
-# Using Dict[str, Any] for environmental data to flexibly handle Parquet column names
+
 class EnvironmentalDataResponse(BaseModel):
     data: List[Dict[str, Any]]
 
-# ==========================================
-# 4. MODEL EVALUATION SCHEMAS (Real Metrics)
-# ==========================================
+
+# MODEL EVALUATION SCHEMAS (Real Metrics)
+
 
 class FeatureImportance(BaseModel):
     feature: str
@@ -123,9 +123,9 @@ class ResidualBin(BaseModel):
     bin_center: float
     count: int
 
-# ==========================================
-# 5. WRAPPER SCHEMAS (For clean JSON responses)
-# ==========================================
+
+# WRAPPER SCHEMAS (For clean JSON responses)
+
 
 class TrendResponse(BaseModel):
     data: List[TrendDataPoint]
@@ -146,4 +146,4 @@ class ResidualResponse(BaseModel):
     data: List[ResidualBin]
 
 class ModelMetricsResponse(BaseModel):
-    data: List[Dict[str, Any]] # Flexible dict to handle any columns in model_comparison.csv
+    data: List[Dict[str, Any]] 

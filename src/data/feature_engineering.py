@@ -1,7 +1,7 @@
 """
-INTERVIEW-LEVEL Feature Engineering
+Feature Engineering
 Creates lag features, rolling statistics, and advanced features
-FIXED: Target Leakage removed and Memory Optimization added
+
 """
 import pandas as pd
 import numpy as np
@@ -17,11 +17,7 @@ class SalesFeatureEngineer:
         self.label_encoders = {}
         
     def reduce_memory_usage(self, df):
-        """
-        🟢 UPGRADE: Memory Optimization
-        Pandas uses float64 by default. On millions of rows, this crashes RAM.
-        Downcasting to float32/int32 saves ~50% of memory.
-        """
+        
         print("Optimizing memory usage...")
         start_mem = df.memory_usage().sum() / 1024**2
         
@@ -41,35 +37,35 @@ class SalesFeatureEngineer:
                     df[col] = df[col].astype(np.float32) # Downcast floats to float32
                     
         end_mem = df.memory_usage().sum() / 1024**2
-        print(f"  ✓ Memory reduced from {start_mem:.1f} MB to {end_mem:.1f} MB (Decreased by {100 * (start_mem - end_mem) / start_mem:.1f}%)")
+        print(f"   Memory reduced from {start_mem:.1f} MB to {end_mem:.1f} MB (Decreased by {100 * (start_mem - end_mem) / start_mem:.1f}%)")
         return df
 
     def create_lag_features(self, df, lags=[1, 7, 14, 28]):
         """
         Create lag features (sales from previous periods)
-        Removed 365 lag to prevent dropping a full year of training data.
+        
         """
         print("Creating lag features...")
         grouped = df.groupby(['store_id', 'product_id'])['sales']
         
         for lag in lags:
             df[f'sales_lag_{lag}'] = grouped.shift(lag)
-            print(f"  ✓ Created lag_{lag}")
+            print(f"   Created lag_{lag}")
             
         return df
     
     def create_rolling_features(self, df, windows=[7, 14, 28]):
         """
         Rolling statistics (moving averages, std)
-        🔴 CRITICAL FIX: Added .shift(1) to prevent Target Leakage!
+        
         """
         print("Creating rolling features...")
         
-        # 🟢 UPGRADE: Create the groupby object ONCE to save massive computation time
+        
         grouped = df.groupby(['store_id', 'product_id'])['sales']
         
         for window in windows:
-            # Shift 1 ensures we don't include TODAY'S sales in the rolling average
+           
             df[f'sales_rolling_mean_{window}'] = grouped.transform(lambda x: x.shift(1).rolling(window, min_periods=1).mean())
             df[f'sales_rolling_std_{window}']  = grouped.transform(lambda x: x.shift(1).rolling(window, min_periods=1).std())
             df[f'sales_rolling_min_{window}']  = grouped.transform(lambda x: x.shift(1).rolling(window, min_periods=1).min())
@@ -82,7 +78,7 @@ class SalesFeatureEngineer:
     def create_expansion_features(self, df):
         """
         Expanding window features (cumulative statistics)
-        🔴 CRITICAL FIX: Added .shift(1)
+        
         """
         print("Creating expanding features...")
         grouped = df.groupby(['store_id', 'product_id'])['sales']
@@ -90,13 +86,13 @@ class SalesFeatureEngineer:
         df['sales_expanding_mean'] = grouped.transform(lambda x: x.shift(1).expanding(min_periods=1).mean())
         df['sales_expanding_std']  = grouped.transform(lambda x: x.shift(1).expanding(min_periods=1).std())
         
-        print("  ✓ Created expanding features")
+        print("   Created expanding features")
         return df
     
     def create_diff_features(self, df):
         """
         Difference features (change from previous period)
-        🔴 CRITICAL FIX: Must compare past values, not current values.
+        
         """
         print("Creating difference features...")
         grouped = df.groupby(['store_id', 'product_id'])['sales']
@@ -106,7 +102,7 @@ class SalesFeatureEngineer:
         df['sales_diff_7'] = grouped.transform(lambda x: x.shift(1).diff(7))
         df['sales_pct_change_1'] = grouped.transform(lambda x: x.shift(1).pct_change(1))
         
-        print("  ✓ Created difference features")
+        print("   Created difference features")
         return df
     
     def create_date_features(self, df):
@@ -125,7 +121,7 @@ class SalesFeatureEngineer:
         df['is_year_end'] = df['date'].dt.is_year_end.astype(np.int8)
         df['days_to_month_end'] = df['date'].dt.days_in_month - df['date'].dt.day
         
-        print("  ✓ Created date features")
+        print("   Created date features")
         return df
     
     def create_cyclic_features(self, df):
@@ -137,7 +133,7 @@ class SalesFeatureEngineer:
         df['dow_sin'] = np.sin(2 * np.pi * df['day_of_week'] / 7).astype(np.float32)
         df['dow_cos'] = np.cos(2 * np.pi * df['day_of_week'] / 7).astype(np.float32)
         
-        print("  ✓ Created cyclic features")
+        print("   Created cyclic features")
         return df
     
     def create_interaction_features(self, df):
@@ -155,7 +151,7 @@ class SalesFeatureEngineer:
         
         df['discount_depth'] = (df['base_price'] - df['price']).astype(np.float32)
         
-        print("  ✓ Created interaction features")
+        print("   Created interaction features")
         return df
     
     def encode_categorical(self, df, categorical_cols):
@@ -169,8 +165,8 @@ class SalesFeatureEngineer:
             else:
                 df[f'{col}_encoded'] = self.label_encoders[col].transform(df[col].astype(str))
             
-            # Save memory by dropping the original text column since we have the encoded one!
-            if col != 'store_id' and col != 'product_id':  # Keep primary keys for later merging
+            
+            if col != 'store_id' and col != 'product_id':  
                 df = df.drop(columns=[col])
                 
             print(f"  ✓ Encoded {col}")
@@ -179,7 +175,7 @@ class SalesFeatureEngineer:
     
     def process(self, df):
         """Complete feature engineering pipeline"""
-        print("\n🔧 Starting Feature Engineering Pipeline...")
+        print("\n Starting Feature Engineering Pipeline...")
         print("=" * 60)
         
         # Sort data once at the very beginning (Crucial for time-series)
@@ -196,7 +192,7 @@ class SalesFeatureEngineer:
         categorical_cols = ['category', 'location_type', 'store_size', 'region', 'temp_category']
         df = self.encode_categorical(df, categorical_cols)
         
-        # Optimize memory right before dropping NaNs
+        
         df = self.reduce_memory_usage(df)
         
         initial_rows = len(df)
@@ -204,7 +200,7 @@ class SalesFeatureEngineer:
         dropped_rows = initial_rows - len(df)
         
         print("=" * 60)
-        print(f"✅ Feature Engineering Complete!")
+        print(f" Feature Engineering Complete!")
         print(f"  Initial rows: {initial_rows:,}")
         print(f"  Dropped rows (NaN): {dropped_rows:,}")
         print(f"  Final rows: {len(df):,}")
@@ -213,7 +209,7 @@ class SalesFeatureEngineer:
         return df
 
 def main():
-    print("📦 Loading data...")
+    print(" Loading data...")
     df = pd.read_parquet('data/processed/walmart_enhanced.parquet')
     df['date'] = pd.to_datetime(df['date'])
     print(f"✓ Loaded {len(df):,} records")

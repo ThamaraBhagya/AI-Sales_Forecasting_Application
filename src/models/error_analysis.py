@@ -17,14 +17,14 @@ def create_error_analysis():
     # Load predictions
     df = pd.read_csv('models/reports/test_predictions.csv')
     
-    # Create output directory
+    
     os.makedirs('models/reports/charts', exist_ok=True)
     
-    # Set style
+    
     plt.style.use('seaborn-v0_8-darkgrid')
     sns.set_palette('husl')
     
-    # 1. Actual vs Predicted (XGBoost)
+    # Actual vs Predicted 
     fig, axes = plt.subplots(1, 2, figsize=(15, 5))
     
     # XGBoost
@@ -52,7 +52,7 @@ def create_error_analysis():
     print("   ✓ Saved: actual_vs_predicted.png")
     plt.close()
     
-    # 2. Residual Distribution
+    # Residual Distribution
     fig, axes = plt.subplots(1, 2, figsize=(15, 5))
     
     xgb_residuals = df['actual'] - df['xgboost']
@@ -77,7 +77,7 @@ def create_error_analysis():
     print("   ✓ Saved: residual_distribution.png")
     plt.close()
     
-    # 3. Model Comparison Bar Chart
+    # Model Comparison Bar Chart
     comparison = pd.read_csv('models/reports/model_comparison.csv')
     
     fig, axes = plt.subplots(2, 2, figsize=(15, 10))
@@ -91,7 +91,7 @@ def create_error_analysis():
         ax.set_ylabel(metric)
         ax.grid(True, alpha=0.3, axis='y')
         
-        # Add value labels on bars
+        
         for container in ax.containers:
             ax.bar_label(container, fmt='%.2f')
     
@@ -100,7 +100,7 @@ def create_error_analysis():
     print("   ✓ Saved: model_comparison.png")
     plt.close()
     
-    # 4. Feature Importance (Top 20)
+    # Feature Importance (Top 20)
     try:
         xgb_importance = pd.read_csv('models/reports/xgboost_feature_importance.csv')
         lgb_importance = pd.read_csv('models/reports/lightgbm_feature_importance.csv')

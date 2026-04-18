@@ -42,26 +42,26 @@ class InferenceFeatureEngineer:
         df['is_year_end'] = df['date'].dt.is_year_end.astype(np.int8)
         df['days_to_month_end'] = df['date'].dt.days_in_month - df['date'].dt.day
         
-        # === SMART LAG FEATURES ===
-        # Generate realistic historical data that reacts to the frontend parameters
+        # SMART LAG FEATURES 
+        
         
         base_multiplier = 3.0
         
-        # 1. Store Size Impact
+        # Store Size Impact
         size = request_data.get('store_size', 'Medium')
         if size == 'Large': 
             base_multiplier *= 2.0
         elif size == 'Small': 
             base_multiplier *= 0.3
             
-        # 2. Location Impact
+        # Location Impact
         loc = request_data.get('location_type', 'Urban')
         if loc == 'Urban': 
             base_multiplier *= 1.5
         elif loc == 'Rural': 
             base_multiplier *= 0.6
             
-        # 3. Competition Impact (0.0 to 1.0)
+        # Competition Impact (0.0 to 1.0)
         # Higher competition reduces historical volume
         comp = request_data.get('competition_level', 0.5)
         base_multiplier *= (1.8 - comp) 

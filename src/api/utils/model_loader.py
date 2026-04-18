@@ -37,7 +37,7 @@ class ModelLoader:
         self._model_data = joblib.load(self.model_path)
         self.loaded_at = datetime.now().isoformat()
         
-        # Load label encoders (needed for categorical encoding)
+        # Load label encoders 
         self._load_encoders()
         
         print(f"✓ Model loaded: {self._model_data['model_type']}")
@@ -47,8 +47,7 @@ class ModelLoader:
     
     def _load_encoders(self):
         """Load or create label encoders for categorical features"""
-        # In production, these would be saved during training
-        # For now, create them with expected mappings
+       
         
         self._label_encoders = {
             'category': {
@@ -99,7 +98,7 @@ class ModelLoader:
             else:
                 importances = [0] * len(feature_names)
                 
-            # Normalize to percentages so it looks good on the frontend chart
+            
             total_importance = sum(importances)
             if total_importance > 0:
                 importances = [float(i) / total_importance for i in importances]

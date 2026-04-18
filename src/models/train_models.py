@@ -1,6 +1,6 @@
 """
-PRODUCTION-GRADE Model Training Pipeline
-Trains XGBoost and LightGBM with MLflow tracking
+Model Training Pipeline
+Trains XGBoost and LightGBM 
 Includes true Time-Series splitting (Train/Val/Test) and feature importance
 """
 import pandas as pd
@@ -19,7 +19,7 @@ warnings.filterwarnings('ignore')
 
 class SalesForecastTrainer:
     """
-    Multi-model training pipeline with MLflow tracking
+    Multi-model training pipeline 
     """
     
     def __init__(self, experiment_name='sales_forecasting', random_state=42):
@@ -28,7 +28,7 @@ class SalesForecastTrainer:
         self.models = {}
         self.results = {}
         
-        # Set MLflow experiment
+        
         mlflow.set_experiment(experiment_name)
         
     def prepare_data(self, df, val_size=0.1, test_size=0.1):
@@ -42,18 +42,18 @@ class SalesForecastTrainer:
         feature_cols = [col for col in df.columns if col not in exclude_cols]
         print(f"   Total features: {len(feature_cols)}")
         
-        # 🟢 UPGRADE: Split by unique dates, not by row indices
+        # Split by unique dates, not by row indices
         unique_dates = df['date'].sort_values().unique()
         total_days = len(unique_dates)
         
-        # Calculate index cutoffs for dates
+        
         val_idx = int(total_days * (1 - (val_size + test_size)))
         test_idx = int(total_days * (1 - test_size))
         
         val_start_date = unique_dates[val_idx]
         test_start_date = unique_dates[test_idx]
         
-        # Split the dataframe mathematically by date
+        
         train = df[df['date'] < val_start_date]
         val = df[(df['date'] >= val_start_date) & (df['date'] < test_start_date)]
         test = df[df['date'] >= test_start_date]
@@ -77,7 +77,7 @@ class SalesForecastTrainer:
             'mape': mean_absolute_percentage_error(y_true, y_pred) * 100
         }
         
-        print(f"\n   📈 {model_name} Metrics:")
+        print(f"\n   {model_name} Metrics:")
         print(f"      MAE:  {metrics['mae']:.2f}")
         print(f"      RMSE: {metrics['rmse']:.2f}")
         print(f"      R²:   {metrics['r2']:.4f}")
@@ -87,7 +87,7 @@ class SalesForecastTrainer:
     
     def train_xgboost(self, X_train, X_val, X_test, y_train, y_val, y_test):
         """Train XGBoost model with MLflow tracking"""
-        print("\n🚀 Training XGBoost...")
+        print("\n Training XGBoost...")
         
         with mlflow.start_run(run_name=f"XGBoost_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
             params = {
@@ -108,7 +108,7 @@ class SalesForecastTrainer:
             mlflow.log_params(params)
             model = xgb.XGBRegressor(**params)
             
-            # 🟢 UPGRADE: Early stopping uses Validation set, NOT Test set
+            
             model.fit(
                 X_train, y_train,
                 eval_set=[(X_val, y_val)],
@@ -138,7 +138,7 @@ class SalesForecastTrainer:
             }, model_path)
             mlflow.log_artifact(model_path)
             
-            print(f"   ✅ XGBoost trained and saved to {model_path}")
+            print(f"    XGBoost trained and saved to {model_path}")
             
             self.models['xgboost'] = model
             self.results['xgboost'] = {
@@ -151,7 +151,7 @@ class SalesForecastTrainer:
     
     def train_lightgbm(self, X_train, X_val, X_test, y_train, y_val, y_test):
         """Train LightGBM model with MLflow tracking"""
-        print("\n🚀 Training LightGBM...")
+        print("\n Training LightGBM...")
         
         with mlflow.start_run(run_name=f"LightGBM_{datetime.now().strftime('%Y%m%d_%H%M%S')}"):
             params = {
@@ -174,7 +174,7 @@ class SalesForecastTrainer:
             mlflow.log_params(params)
             model = lgb.LGBMRegressor(**params)
             
-            # 🟢 UPGRADE: Early stopping uses Validation set
+            
             model.fit(
                 X_train, y_train,
                 eval_set=[(X_val, y_val)],
@@ -202,7 +202,7 @@ class SalesForecastTrainer:
             }, model_path)
             mlflow.log_artifact(model_path)
             
-            print(f"   ✅ LightGBM trained and saved to {model_path}")
+            print(f"    LightGBM trained and saved to {model_path}")
             
             self.models['lightgbm'] = model
             self.results['lightgbm'] = {
@@ -215,7 +215,7 @@ class SalesForecastTrainer:
     
     def create_comparison_report(self):
         """Create comprehensive model comparison report"""
-        print("\n📊 Creating Model Comparison Report...")
+        print("\n Creating Model Comparison Report...")
         
         comparison = []
         for model_name, results in self.results.items():
@@ -248,7 +248,7 @@ class SalesForecastTrainer:
     
     def save_feature_importance(self, model, model_name, feature_cols):
         """Save feature importance to CSV"""
-        print(f"\n📊 Extracting feature importance for {model_name}...")
+        print(f"\n Extracting feature importance for {model_name}...")
         
         if hasattr(model, 'feature_importances_'):
             importance = model.feature_importances_
@@ -261,13 +261,13 @@ class SalesForecastTrainer:
             importance_path = f'models/reports/{model_name}_feature_importance.csv'
             importance_df.to_csv(importance_path, index=False)
             
-            print(f"   ✅ Feature importance saved to {importance_path}")
+            print(f"    Feature importance saved to {importance_path}")
             print(f"\n   🔝 Top 10 Features:")
             print(importance_df.head(10).to_string(index=False))
             
             return importance_df
         else:
-            print(f"   ⚠️ Model {model_name} doesn't support feature importance")
+            print(f"    Model {model_name} doesn't support feature importance")
             return None
     
     def train_all(self, df):
@@ -296,19 +296,19 @@ class SalesForecastTrainer:
         predictions_df.to_csv('models/reports/test_predictions.csv', index=False)
         
         print("\n" + "=" * 80)
-        print("✅ TRAINING COMPLETE!")
+        print(" TRAINING COMPLETE!")
         print("=" * 80)
-        print(f"📁 Models saved in: models/")
-        print(f"📊 Reports saved in: models/reports/")
-        print(f"🔬 MLflow UI: Run 'mlflow ui' to view experiments")
+        print(f" Models saved in: models/")
+        print(f" Reports saved in: models/reports/")
+        print(f" MLflow UI: Run 'mlflow ui' to view experiments")
         
         return comparison_df, best_model
 
 def main():
-    print("\n🚀 Sales Forecasting Model Training Pipeline")
+    print("\n Sales Forecasting Model Training Pipeline")
     print("=" * 80)
     
-    print("\n📦 Loading featured data...")
+    print("\n Loading featured data...")
     df = pd.read_parquet('data/processed/sales_featured.parquet')
     print(f"✓ Loaded {len(df):,} records with {len(df.columns)} features")
     
