@@ -1,6 +1,6 @@
 """
 FastAPI Application for Sales Forecasting
-Production-grade API with model serving and real data analytics
+
 """
 from pathlib import Path
 import sys
@@ -12,11 +12,11 @@ from datetime import datetime
 import uvicorn
 from contextlib import asynccontextmanager
 
-# Ensure Python path is set correctly for local imports
+
 if __package__ is None or __package__ == "":
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-# Import Schemas
+
 from src.api.schemas import (
     PredictionRequest, PredictionResponse,
     BatchPredictionRequest, BatchPredictionResponse,
@@ -24,28 +24,28 @@ from src.api.schemas import (
     ModelInsightsResponse,HistoricalDataResponse
 )
 
-# Import Utilities
+
 from src.api.utils.model_loader import ModelLoader
 from src.api.utils.feature_engineer import InferenceFeatureEngineer
 from src.api.utils.data_explorer import DataExplorer
 
-# Initialize global instances
+
 model_loader = ModelLoader()
 data_explorer = DataExplorer()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # This runs when the server starts
+    
     try:
         model_loader.load_model()
-        print("✅ Backend Systems Online: ML Model Ready")
-        print("✅ Data Explorer connected to Parquet/CSV storage")
+        print(" Backend Systems Online: ML Model Ready")
+        print(" Data Explorer connected to Parquet/CSV storage")
     except Exception as e:
-        print(f"⚠️ Startup Warning: {e}")
+        print(f" Startup Warning: {e}")
     yield
-    # Cleanup runs here on shutdown
+    
 
-# Create FastAPI App
+
 app = FastAPI(
     title="Sales Forecasting API",
     description="Production ML API for retail sales forecasting and analytics",
@@ -55,18 +55,18 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware for Next.js frontend connection
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For dev. In production, change to your Next.js URL.
+    allow_origins=["*"],  
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# ==========================================
+
 # SYSTEM / HEALTH ENDPOINTS
-# ==========================================
+
 
 @app.get("/", tags=["Root"])
 async def root():
@@ -82,9 +82,9 @@ async def health_check():
         timestamp=datetime.now().isoformat()
     )
 
-# ==========================================
-# 1. ANALYTICS ENDPOINTS (Reads from Parquet)
-# ==========================================
+
+# ANALYTICS ENDPOINTS 
+
 
 @app.get("/analytics/trends", tags=["Analytics Dashboard"])
 async def get_historical_trends(
@@ -125,9 +125,9 @@ async def get_seasonal_patterns():
 async def get_promotion_effectiveness():
     """Returns REAL promotion effectiveness and revenue lift"""
     return {"data": data_explorer.get_promotion_effectiveness()}
-# ==========================================
-# 2. MODEL PERFORMANCE ENDPOINTS (Reads from CSV)
-# ==========================================
+
+#  MODEL PERFORMANCE ENDPOINTS 
+
 
 @app.get("/model/performance", tags=["Model Evaluation"])
 async def get_model_performance():
@@ -155,7 +155,7 @@ async def get_feature_importance():
     
     return ModelInsightsResponse(
         model_type=model_data['model_type'],
-        top_features=importances[:20]  # Top 20 as requested in your architecture
+        top_features=importances[:20]  
     )
 
 @app.get("/model/info", response_model=ModelInfo, tags=["Model Evaluation"])
@@ -182,9 +182,9 @@ async def reload_model():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# ==========================================
-# 3. PREDICTION SIMULATOR (Live ML Inference)
-# ==========================================
+
+#  PREDICTION SIMULATOR 
+
 
 @app.post("/predict", response_model=PredictionResponse, tags=["Inference Simulator"])
 async def predict_sales(request: PredictionRequest):
@@ -199,7 +199,7 @@ async def predict_sales(request: PredictionRequest):
         feature_engineer = InferenceFeatureEngineer(encoders)
         features_df = feature_engineer.engineer_features(request.model_dump())
         
-        # Ensure exact column match
+        
         model_features = model_data['feature_cols']
         for col in model_features:
             if col not in features_df.columns:

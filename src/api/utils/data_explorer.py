@@ -56,7 +56,7 @@ class DataExplorer:
         # Group by the encoded category
         category_sales = df.groupby('category_encoded')['sales'].sum().reset_index()
         
-        # Map numbers back to text using your exact alphabetical categories
+        
         category_map = {
             0: "Grocery", 
             1: "Electronics", 
@@ -89,7 +89,7 @@ class DataExplorer:
         df = pd.read_parquet(self.featured_path, columns=['region_encoded', 'sales'])
         region_sales = df.groupby('region_encoded')['sales'].sum().reset_index()
         
-        # 🟢 FIXED: Exact regional mapping from your ModelLoader
+        
         region_map = {
             0: 'Northeast', 
             1: 'Southeast', 
@@ -177,24 +177,24 @@ class DataExplorer:
     
 
     def get_model_metrics(self) -> List[Dict]:
-        """🏆 Model Comparison Dashboard (MAE, RMSE, R2)"""
+        """ Model Comparison Dashboard (MAE, RMSE, R2)"""
         if not self.metrics_path.exists():
             return []
             
         df = pd.read_csv(self.metrics_path)
-        # Expected columns: Model, MAE, RMSE, R2, MAPE, etc.
+        
         return df.to_dict(orient='records')
 
     def get_actual_vs_predicted(self, sample_size: int = 500) -> List[Dict]:
-        """📊 Actual vs Predicted Scatter Plot"""
+        """ Actual vs Predicted Scatter Plot"""
         if not self.test_preds_path.exists():
             return []
             
-        # Usecols prevents loading unnecessary data into RAM
+        
         try:
             df = pd.read_csv(self.test_preds_path, usecols=['actual', 'predicted'])
         except ValueError:
-            # Fallback in case your columns are named differently (e.g., actual_sales)
+            
             df = pd.read_csv(self.test_preds_path)
             
         # Rename to standard keys if necessary
@@ -214,7 +214,7 @@ class DataExplorer:
         return result
 
     def get_error_distribution(self, bins: int = 20) -> List[Dict]:
-        """📉 Error Distribution (Residuals) for Histogram"""
+        """ Error Distribution (Residuals) for Histogram"""
         if not self.test_preds_path.exists():
             return []
             
@@ -227,13 +227,13 @@ class DataExplorer:
         actual_col = 'actual' if 'actual' in cols else cols[0]
         pred_col = 'predicted' if 'predicted' in cols else cols[1]
 
-        # Calculate Residuals (Error = Actual - Predicted)
+        
         df['error'] = df[actual_col] - df[pred_col]
         
-        # Create bins for the histogram using numpy
+        
         counts, bin_edges = np.histogram(df['error'].dropna(), bins=bins)
         
-        # Format for frontend bar chart
+        
         distribution = []
         for i in range(len(counts)):
             bin_center = (bin_edges[i] + bin_edges[i+1]) / 2

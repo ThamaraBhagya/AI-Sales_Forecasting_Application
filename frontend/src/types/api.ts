@@ -3,12 +3,9 @@
  * This ensures end-to-end type safety between Python and Next.js.
  */
 
-// ==========================================
-// 1. PREDICTION SCHEMAS (The Simulator)
-// ==========================================
 
 export interface PredictionRequest {
-  date: string; // YYYY-MM-DD
+  date: string; 
   store_id: string;
   product_id: string;
   category: string;
@@ -17,14 +14,14 @@ export interface PredictionRequest {
   region: string;
   price: number;
   base_price: number;
-  discount: number; // 0.0 to 1.0
-  promotion: number; // 0 or 1
+  discount: number; 
+  promotion: number; 
   temperature: number;
   fuel_price: number;
   cpi: number;
   unemployment: number;
   stock_level: number;
-  competition_level: number; // 0.0 to 1.0
+  competition_level: number; 
 }
 
 export interface PredictionResponse {
@@ -47,9 +44,7 @@ export interface BatchPredictionResponse {
   model_used: string;
 }
 
-// ==========================================
-// 2. SYSTEM SCHEMAS
-// ==========================================
+
 
 export interface ModelInfo {
   model_type: string;
@@ -67,9 +62,7 @@ export interface HealthResponse {
   timestamp: string;
 }
 
-// ==========================================
-// 3. ANALYTICS SCHEMAS (Real Historical Data)
-// ==========================================
+
 
 export interface TrendDataPoint {
   date: string;
@@ -91,7 +84,6 @@ export interface RegionSales {
   sales: number;
 }
 
-// API Wrapper Responses (Matching the {"data": [...]} structure)
 export interface TrendResponse {
   data: TrendDataPoint[];
 }
@@ -109,13 +101,11 @@ export interface RegionSalesResponse {
 }
 
 export interface EnvironmentalDataResponse {
-  // Using Record to handle dynamic column names from the Parquet file
+  
   data: Record<string, string | number>[];
 }
 
-// ==========================================
-// 4. MODEL EVALUATION SCHEMAS (Real Metrics)
-// ==========================================
+
 
 export interface FeatureImportance {
   feature: string;
@@ -147,6 +137,6 @@ export interface ResidualResponse {
 }
 
 export interface ModelMetricsResponse {
-  // Model comparison table structure
+  
   data: Record<string, string | number>[];
 }
