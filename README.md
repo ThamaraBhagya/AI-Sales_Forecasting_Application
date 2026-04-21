@@ -7,11 +7,18 @@ End-to-end retail sales forecasting system with:
 
 This repository is designed to demonstrate production-style ML application architecture: data preparation, model training, model serving, and interactive decision support.
 
-## 1. Technical Overview
+## 1. Project Highlights
+
+- Problem: forecast weekly Walmart sales at the store level from historical demand, promotions, calendar effects, and store metadata
+- Approach: tree-based regression forecasting with XGBoost and LightGBM, using lag, rolling, expanding, cyclic, and interaction features
+- Validation: strict date-based train/validation/test split to avoid leakage
+- Result: LightGBM achieved the best test score in the current run with RMSE 6,216.45, MAE 3,919.32, and MAPE 18.00%
+
+## 2. Technical Overview
 
 ### Core capabilities
 - Historical sales analytics by trends, categories, stores, regions, seasonality, and promotions
-- Real-time single and batch forecasting using a trained LightGBM model
+- Real-time single and batch weekly store-level forecasting using a trained LightGBM model
 - Model evaluation views (performance metrics, residuals, scatter, feature importance)
 - Synthetic product-level enrichment on top of Walmart sales data to support richer simulation inputs
 
@@ -21,7 +28,7 @@ This repository is designed to demonstrate production-style ML application archi
 - Serving layer: FastAPI app with model loader + inference feature engineering + analytics explorer
 - Presentation layer: Next.js frontend with typed API services and feature-specific pages/components
 
-## 2. Tech Stack
+## 3. Tech Stack
 
 ### Backend and ML
 - Python
@@ -38,7 +45,7 @@ This repository is designed to demonstrate production-style ML application archi
 - React Hook Form + Zod
 - Radix UI/shadcn component primitives
 
-## 3. Repository Layout
+## 4. Repository Layout
 
 - src/api: FastAPI application, schemas, model/data utility services
 - src/data: ingestion, synthetic enhancement, and feature engineering scripts
@@ -50,7 +57,7 @@ This repository is designed to demonstrate production-style ML application archi
 - frontend/src/services: typed API integration layer
 - frontend/src/hooks: data-fetching and simulator state hooks
 
-## 4. Data and Model Pipeline
+## 5. Data and Model Pipeline
 
 Run scripts from repository root in this order:
 
@@ -85,7 +92,7 @@ Run scripts from repository root in this order:
 - /simulator: what-if prediction simulator
 - /business: business-facing strategic insights
 
-## Local Setup and Run
+## 6. Local Setup and Run
 
 ### Prerequisites
 - Python 3.10+
