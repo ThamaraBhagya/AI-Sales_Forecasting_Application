@@ -26,7 +26,7 @@ export default function FeatureImportanceChart() {
         setIsLoading(true);
         const data = await modelsService.getFeatureImportance();
         
-        // Sort data just in case the backend didn't, and take top 15 so it fits nicely
+        
         const sortedFeatures = data.top_features
           .sort((a, b) => b.importance - a.importance)
           .slice(0, 15);
@@ -45,7 +45,7 @@ export default function FeatureImportanceChart() {
     fetchInsights();
   }, []);
 
-  // Custom Tooltip for the chart to format decimals into percentages
+ 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
@@ -105,7 +105,7 @@ export default function FeatureImportanceChart() {
                 stroke="#64748b"
                 fontSize={12}
               />
-              {/* Width=120 ensures long feature names like 'promo_holiday_interaction' fit nicely */}
+              
               <YAxis 
                 type="category" 
                 dataKey="feature" 

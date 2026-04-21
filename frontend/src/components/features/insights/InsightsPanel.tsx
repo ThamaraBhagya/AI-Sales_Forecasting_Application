@@ -22,11 +22,11 @@ export default function InsightsPanel() {
     const fetchAllInsights = async () => {
       try {
         setIsLoading(true);
-        // Fetch all data in parallel to make the dashboard load incredibly fast
+        
         const [metricsRes, scatterRes, residualsRes] = await Promise.all([
           modelsService.getPerformanceMetrics(),
-          modelsService.getScatterData(300), // Request 300 points so the browser doesn't lag
-          modelsService.getResidualsData(15) // 15 bins for the histogram
+          modelsService.getScatterData(300), 
+          modelsService.getResidualsData(15) 
         ]);
 
         setMetrics(metricsRes);
@@ -42,7 +42,7 @@ export default function InsightsPanel() {
     fetchAllInsights();
   }, []);
 
-  // Find the primary model metrics (assuming LightGBM is what we want to highlight)
+  
   const primaryModel = metrics.find(m => m.Model === 'LIGHTGBM') || metrics[0] || {};
 
   if (isLoading) {
@@ -64,7 +64,7 @@ export default function InsightsPanel() {
     );
   }
 
-  // Calculate the max domain for the scatter plot reference line
+  
   const maxVal = Math.max(
     ...scatterData.map(d => d.actual), 
     ...scatterData.map(d => d.predicted)
@@ -73,7 +73,7 @@ export default function InsightsPanel() {
   return (
     <div className="space-y-6">
       
-      {/* TOP ROW: KPI Metrics Cards */}
+     
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex items-center">
           <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg mr-4">
@@ -112,12 +112,10 @@ export default function InsightsPanel() {
         </div>
       </div>
 
-      {/* ==========================================
-          MODEL COMPARISON CHARTS
-          ========================================== */}
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-2">
         
-        {/* Chart 1: Error Metrics (MAE & RMSE) */}
+        
         <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 h-[400px] flex flex-col">
           <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-6">
             Error Comparison <span className="text-sm font-normal text-slate-500">(Lower is Better)</span>
@@ -155,9 +153,7 @@ export default function InsightsPanel() {
               <BarChart data={metrics} margin={{ top: 10, right: 10, left: 10, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />
                 <XAxis dataKey="Model" stroke="#64748b" fontSize={12} tickMargin={10} />
-                {/* Because both models score ~0.91, starting the Y-axis at 0 makes them look identical. 
-                  We set the domain to [0.85, 0.95] to zoom in and highlight LightGBM's superiority.
-                */}
+                
                 <YAxis 
                   stroke="#64748b" 
                   fontSize={12} 
@@ -178,13 +174,13 @@ export default function InsightsPanel() {
 
       </div>
 
-      {/* MIDDLE ROW: Feature Importance & Residuals */}
+     
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Left: Your standalone Feature Importance Component */}
+        
         <FeatureImportanceChart />
 
-        {/* Right: Error Distribution (Residuals) */}
+       
         <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col h-[500px]">
           <div className="mb-6">
             <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Error Distribution (Residuals)</h3>
@@ -209,7 +205,7 @@ export default function InsightsPanel() {
                   {residualsData.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      // Color errors near 0 green, and large errors red
+                      
                       fill={Math.abs(entry.bin_center) < 100 ? '#10b981' : Math.abs(entry.bin_center) < 500 ? '#f59e0b' : '#ef4444'} 
                     />
                   ))}
@@ -220,7 +216,7 @@ export default function InsightsPanel() {
         </div>
       </div>
 
-      {/* BOTTOM ROW: Actual vs Predicted Scatter */}
+      
       <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 h-[500px] flex flex-col">
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200">Actual vs. Predicted Sales</h3>
@@ -254,7 +250,7 @@ export default function InsightsPanel() {
               />
               <Scatter name="Predictions" data={scatterData} fill="#3b82f6" fillOpacity={0.6} />
               
-              {/* The "Perfect Prediction" Reference Line */}
+              
               <ReferenceLine 
                 segment={[{ x: 0, y: 0 }, { x: maxVal, y: maxVal }]} 
                 stroke="#ef4444" 

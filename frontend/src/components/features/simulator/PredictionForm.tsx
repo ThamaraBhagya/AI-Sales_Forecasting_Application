@@ -4,7 +4,7 @@ import React from 'react';
 import { PredictionRequest } from '@/types/api';
 import { Calculator, DollarSign, TrendingUp, AlertCircle, RefreshCcw } from 'lucide-react';
 
-// Define the Props this form needs to receive from the parent
+
 interface PredictionFormProps {
   formData: PredictionRequest;
   isLoading: boolean;
@@ -25,7 +25,7 @@ export default function PredictionForm({
   return (
     <form onSubmit={onSubmit} className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
       
-      {/* Section 1: Product & Pricing */}
+      
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4 flex items-center">
           <DollarSign className="w-5 h-5 mr-2 text-blue-500" /> Product & Pricing
@@ -59,7 +59,7 @@ export default function PredictionForm({
             </button>
           </div>
         </div>
-        {/* Read-Only Computed Price */}
+        
         <div className="mt-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
           <span className="text-sm text-slate-500 dark:text-slate-400">Final Computed Price: </span>
           <span className="font-mono font-medium text-slate-900 dark:text-white">${formData.price.toFixed(2)}</span>
@@ -68,7 +68,7 @@ export default function PredictionForm({
 
       <hr className="border-slate-200 dark:border-slate-800 mb-8" />
 
-      {/* Section 2: Store Context */}
+      
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4 flex items-center">
           <TrendingUp className="w-5 h-5 mr-2 text-emerald-500" /> Store Context
@@ -99,7 +99,7 @@ export default function PredictionForm({
 
       <hr className="border-slate-200 dark:border-slate-800 mb-8" />
 
-      {/* Section 3: Macro Environment */}
+      
       <div className="mb-8">
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4 flex items-center">
           <AlertCircle className="w-5 h-5 mr-2 text-orange-500" /> Macro Environment
@@ -116,7 +116,7 @@ export default function PredictionForm({
         </div>
       </div>
 
-      {/* Action Buttons */}
+      
       <div className="flex justify-end pt-4 border-t border-slate-200 dark:border-slate-800">
         <button 
           type="button" 

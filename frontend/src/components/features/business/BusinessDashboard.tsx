@@ -5,7 +5,7 @@ import { PieChart, Pie, Cell, Tooltip as RechartsTooltip, ResponsiveContainer, L
 import { Loader2, PieChart as PieChartIcon, Map } from 'lucide-react';
 import { useSalesByCategory, useSalesByRegion } from '@/hooks/useAnalytics';
 
-// Import the component you just built!
+
 import BusinessInsights from '@/components/features/explorer/BusinessInsights';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#64748b'];
@@ -31,10 +31,10 @@ export default function BusinessDashboard() {
   return (
     <div className="space-y-6">
       
-      {/* TOP ROW: Category and Region */}
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Category Distribution (Pie Chart) */}
+        
         <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 h-[400px] flex flex-col">
           <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2 flex items-center">
             <PieChartIcon className="w-5 h-5 mr-2 text-blue-500" />
@@ -66,7 +66,7 @@ export default function BusinessDashboard() {
           </div>
         </div>
 
-        {/* Region Distribution (Donut Chart) */}
+        
         <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 h-[400px] flex flex-col">
           <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-2 flex items-center">
             <Map className="w-5 h-5 mr-2 text-blue-500" />
@@ -99,7 +99,7 @@ export default function BusinessDashboard() {
         </div>
       </div>
 
-      {/* BOTTOM ROW: Seasonal & Promo (Your existing component) */}
+      
       <BusinessInsights />
 
     </div>

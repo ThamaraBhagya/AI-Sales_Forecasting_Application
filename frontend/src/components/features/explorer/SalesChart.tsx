@@ -13,7 +13,7 @@ import {
 import { Loader2, TrendingUp } from 'lucide-react';
 import { TrendDataPoint } from '@/types/api';
 
-// 1. Define the props this component expects from DataExplorer
+
 interface SalesChartProps {
   data: TrendDataPoint[];
   isLoading: boolean;
@@ -21,7 +21,7 @@ interface SalesChartProps {
 
 export default function SalesChart({ data, isLoading }: SalesChartProps) {
   
-  // 2. Custom Tooltip embedded right inside the component
+  
   const CurrencyTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
       return (
@@ -50,7 +50,7 @@ export default function SalesChart({ data, isLoading }: SalesChartProps) {
       {/* Chart Area */}
       <div className="flex-1 w-full relative">
         
-        {/* Loading State Overlay */}
+        
         {isLoading && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/50 dark:bg-slate-950/50 z-10 rounded-lg">
             <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
@@ -58,14 +58,14 @@ export default function SalesChart({ data, isLoading }: SalesChartProps) {
           </div>
         )}
 
-        {/* Empty State Overlay */}
+        
         {!isLoading && data.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center bg-white/50 dark:bg-slate-950/50 z-10 text-slate-500">
             No trend data available for the selected filters.
           </div>
         )}
 
-        {/* The Recharts LineChart */}
+       
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 20, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" opacity={0.2} />

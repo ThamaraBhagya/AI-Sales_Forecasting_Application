@@ -9,9 +9,9 @@ import PredictionForm from './PredictionForm';
 export default function SimulatorPanel() {
   const { result, isLoading, error, simulatePrediction, resetSimulation } = useSimulator();
 
-  // Initialize with sensible defaults for a fast demo
+  
   const [formData, setFormData] = useState<PredictionRequest>({
-    date: new Date().toISOString().split('T')[0], // Today's date
+    date: new Date().toISOString().split('T')[0], 
     store_id: 'STORE_001',
     product_id: 'PROD_001',
     category: 'Electronics',
@@ -30,13 +30,13 @@ export default function SimulatorPanel() {
     competition_level: 0.5,
   });
 
-  // Auto-calculate the final price whenever base_price or discount changes
+  
   useEffect(() => {
     const calculatedPrice = formData.base_price * (1 - formData.discount);
     setFormData(prev => ({ ...prev, price: parseFloat(calculatedPrice.toFixed(2)) }));
   }, [formData.base_price, formData.discount]);
 
-  // Handle standard input changes
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     
@@ -48,7 +48,7 @@ export default function SimulatorPanel() {
     setFormData(prev => ({ ...prev, [name]: parsedValue }));
   };
 
-  // Handle the toggle for Promotion
+  
   const handleTogglePromo = () => {
     setFormData(prev => ({ ...prev, promotion: prev.promotion === 1 ? 0 : 1 }));
   };
@@ -61,7 +61,6 @@ export default function SimulatorPanel() {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
       
-      {/* LEFT COLUMN: The Input Form */}
       <div className="lg:col-span-2 space-y-6">
         <PredictionForm 
           formData={formData}
@@ -73,7 +72,7 @@ export default function SimulatorPanel() {
         />
       </div>
 
-      {/* RIGHT COLUMN: Results Panel (Sticky) */}
+      
       <div className="lg:col-span-1">
         <div className="sticky top-24 bg-slate-900 rounded-xl shadow-xl border border-slate-800 overflow-hidden flex flex-col h-[400px]">
           <div className="p-6 border-b border-slate-800 bg-slate-950/50">
@@ -97,7 +96,7 @@ export default function SimulatorPanel() {
               <div className="text-center w-full animate-in fade-in zoom-in duration-300">
                 <p className="text-sm text-slate-400 mb-2 uppercase tracking-wider">Forecasted Volume</p>
                 
-                {/* Glowing Result Number */}
+                
                 <div className="relative inline-block">
                   <div className="absolute inset-0 bg-blue-500 blur-2xl opacity-20 rounded-full"></div>
                   <h2 className="text-5xl font-bold text-white relative z-10 font-mono tracking-tight">

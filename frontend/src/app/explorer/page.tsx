@@ -10,9 +10,7 @@ export const metadata: Metadata = {
 export default function ExplorerPage() {
   return (
     <div className="flex flex-col space-y-6">
-      {/* The PageHeader ensures standard typography and spacing across your app.
-        You can pass a title and description. 
-      */}
+      
       <PageHeader 
         title="Data Explorer" 
         description="Interactive analytics dashboard powered by historical Parquet sales data."

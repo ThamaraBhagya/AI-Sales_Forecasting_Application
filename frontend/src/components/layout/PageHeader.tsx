@@ -20,9 +20,7 @@ export default function PageHeader({ title, description, children }: PageHeaderP
         )}
       </div>
       
-      {/* The children prop allows you to inject buttons or filters here.
-        If you don't pass anything, this div just stays empty and hidden.
-      */}
+      
       {children && (
         <div className="flex items-center space-x-2">
           {children}

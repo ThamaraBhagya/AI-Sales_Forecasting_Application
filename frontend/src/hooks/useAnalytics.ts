@@ -1,7 +1,7 @@
 /**
  * Custom React Hooks for Analytics Data
  * These hooks manage the loading states, error handling, and data fetching
- * so your UI components can remain clean and focused on rendering charts.
+ *  UI components can remain clean and focused on rendering charts.
  */
 import { useState, useEffect } from 'react';
 import { analyticsService } from '../services/analytics';
@@ -12,9 +12,7 @@ import {
   RegionSales 
 } from '../types/api';
 
-// ==========================================
-// 1. HISTORICAL TRENDS HOOK
-// ==========================================
+
 export const useHistoricalTrends = (storeId?: string, days: number = 90) => {
   const [data, setData] = useState<TrendDataPoint[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -36,14 +34,12 @@ export const useHistoricalTrends = (storeId?: string, days: number = 90) => {
     };
 
     fetchData();
-  }, [storeId, days]); // Re-fetch automatically if storeId or days change!
+  }, [storeId, days]);
 
   return { data, isLoading, error };
 };
 
-// ==========================================
-// 2. CATEGORY SALES HOOK
-// ==========================================
+
 export const useSalesByCategory = () => {
   const [data, setData] = useState<CategorySales[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -62,14 +58,12 @@ export const useSalesByCategory = () => {
     };
 
     fetchData();
-  }, []); // Empty array means this only fetches once when the component mounts
+  }, []); 
 
   return { data, isLoading, error };
 };
 
-// ==========================================
-// 3. TOP STORES HOOK
-// ==========================================
+
 export const useTopStores = (top: number = 10) => {
   const [data, setData] = useState<StoreSales[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -93,9 +87,7 @@ export const useTopStores = (top: number = 10) => {
   return { data, isLoading, error };
 };
 
-// ==========================================
-// 4. REGION SALES HOOK
-// ==========================================
+
 export const useSalesByRegion = () => {
   const [data, setData] = useState<RegionSales[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);

@@ -77,7 +77,7 @@ export default function BusinessInsights() {
 
       {/* PROMOTION EFFECTIVENESS */}
       <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 h-[400px] flex flex-col relative overflow-hidden">
-        {/* Decorative background glow */}
+        
         <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-emerald-500/10 blur-2xl pointer-events-none"></div>
         
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-6 flex items-center">
@@ -85,7 +85,7 @@ export default function BusinessInsights() {
           Promotion Effectiveness
         </h3>
         
-        {/* KPI Lift Metric */}
+       
         <div className="mb-6 flex items-baseline space-x-2">
           <h2 className="text-5xl font-bold text-emerald-500">+{promoData.lift_percentage}%</h2>
           <span className="text-slate-500 font-medium">Revenue Lift</span>

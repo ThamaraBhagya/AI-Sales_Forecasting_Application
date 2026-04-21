@@ -140,7 +140,7 @@ export default function DataExplorer() {
       {/* MAIN CHART */}
       <SalesChart data={trendData} isLoading={trendLoading} />
 
-      {/* BOTTOM ROW: Top Stores (Bar Chart - Full Width) */}
+     
       <div className="bg-white dark:bg-slate-950 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 h-[400px] flex flex-col">
         <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-6">Top Performing Stores</h3>
         <div className="flex-1 w-full relative">
@@ -161,7 +161,7 @@ export default function DataExplorer() {
                 width={80}
               />
               <RechartsTooltip content={<CurrencyTooltip />} />
-              {/* Reduced barSize from 24 to 12 to make the bars thinner */}
+             
               <Bar dataKey="sales" fill="#10b981" radius={[0, 4, 4, 0]} barSize={12} />
             </BarChart>
           </ResponsiveContainer>
